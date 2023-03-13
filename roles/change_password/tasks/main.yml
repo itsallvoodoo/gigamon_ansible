@@ -1,2 +1,22 @@
 ---
 # tasks file for change_password
+- name: Get: node Facts from FM
+  uri:
+    url: https://{{fm_ip}}/api/v1.3/nodes/flat
+    method: GET
+    user: "{{ fm_username }}"
+    password: "{{ fm_password }}"
+    force_basic_auth: yes
+    validate_certs: False
+    return_content: yes
+    timeout: 30
+    body_format: json
+    status_code: 201,200, 204
+  register: output
+
+- set_fact:
+    node_facts: "{{ item }}"
+  with_items: "{{ output.json.nodes }}"
+  when: item['deviceIp'] == node_ip
+- debug:
+    var: node_facts
